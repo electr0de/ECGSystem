@@ -20,7 +20,7 @@ s.listen(1)
 
 while True:
     c,addr = s.accept()
-    data = c.recv(1024).decode("utf-8")
+    data = c.recv(1024).decode("utf-8") 
     details = json.loads(data)
     print("got details")
     mydb = mysql.connector.connect(
@@ -29,19 +29,12 @@ while True:
         passwd="",
         database="ecg"
     )
-
-    sql = "INSERT INTO patient (name,sex) VALUES (%s, %s)"
-    value = (details["name"],details["sex"])
     mycursor = mydb.cursor()
-
-    mycursor.execute(sql, value)
-    r = mycursor.lastrowid
-    mydb.commit()
     c.send('ok\n'.encode('ascii'))
     print("sent ok")
     df = gd.getData()
 
-    # Process the signals
+
     for index, row in df.iterrows():
 
         c.recv(1024)
@@ -63,7 +56,7 @@ while True:
     raw_open = open("bio_100Hz.csv",'rt')
     raw_data = raw_open.read()
     file = convertToBinaryData()
-    insert_blob_tuple = (r, details["age"], details["doctor_name"],details["tech_name"],raw_data,file,0,0)
+    insert_blob_tuple = (details["id"], details["age"], details["doctor_name"],details["tech_name"],raw_data,file,0,0)
 
     sql_insert_blob_query = "INSERT INTO report (patient_id, patient_age, doctor_name, tech_name,raw_data,report,verfied_by_tech,verfied_by_doctor) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
     mycursor.execute(sql_insert_blob_query, insert_blob_tuple)

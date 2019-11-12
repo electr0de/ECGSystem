@@ -7,8 +7,11 @@ public class Options {
     public JPanel panel1;
     private JButton reviewReportButton;
     private JButton logoutButton;
+    private JLabel userName;
+
 
     public Options() {
+        userName.setText("Welcome, "+Global.user.getName());
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
