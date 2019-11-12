@@ -7,7 +7,6 @@ import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -24,11 +23,12 @@ public class GraphShow {
 
     public GraphShow() {
 
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        //intitialize dataset
         XYSeries xySeries = new XYSeries("mV");
         XYSeriesCollection xyDataset = new XYSeriesCollection();
         xyDataset.addSeries(xySeries);
 
+        //initilize line chart
         lineChart = ChartFactory.createXYLineChart(
                 "ECG",
                 "Time", "mV",
@@ -36,12 +36,10 @@ public class GraphShow {
                 PlotOrientation.VERTICAL,
                 true, true, false);
 
-
+        //initialize chart panel and add it to graphPanel
         ChartPanel chartPanel = createDemoPanel();
         chartPanel.setPreferredSize(new java.awt.Dimension(560, 367));
         graphPanel.removeAll();
-
-
         graphPanel.add(chartPanel, new GridConstraints(), 0);
         graphPanel.revalidate();
 
@@ -71,7 +69,6 @@ public class GraphShow {
                 }
             }
         }).start();
-
 
         doneButton.addActionListener(e -> Global.ChangePanel(new Options().panel1));
     }

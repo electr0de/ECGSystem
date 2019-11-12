@@ -12,15 +12,6 @@ public class DatabaseManager {
     private static Connection Connect() throws SQLException {
         return DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/ecg?serverTimezone=IST","root","");
-
-//        Statement stmt=con.createStatement();
-//
-//        ResultSet rs=stmt.executeQuery("select * from emp");
-//
-//        while(rs.next())
-//            System.out.println(rs.getInt(1)+"  "+rs.getString(2)+"  "+rs.getString(3));
-//
-//        con.close();
     }
 
 

@@ -19,8 +19,8 @@ public class Options {
 
         logoutButton.addActionListener(e -> {
 
-            Global.ChangePanel(new LoginPage().panel1);
             Global.user = null;
+            Global.ChangePanel(new LoginPage().panel1);
 
         });
 

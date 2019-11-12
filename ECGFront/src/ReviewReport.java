@@ -15,7 +15,7 @@ public class ReviewReport {
     private JButton viewReportButton;
 
     private Report selectedReport;
-    DefaultListModel<Report> l1;
+    DefaultListModel<Report> listModel;
 
     public ReviewReport() {
 
@@ -24,13 +24,13 @@ public class ReviewReport {
 
         try {
             List<Report> reports = DatabaseManager.GetAllReports();
-            l1 = new DefaultListModel<>();
+            listModel = new DefaultListModel<>();
 
-            list1.setModel(l1);
+            list1.setModel(listModel);
 
             for(Report r: reports)
                 if(!Global.user.isDoctor() || (Global.user.isDoctor() && r.isVerifiedByTech()))
-                    l1.addElement(r);
+                    listModel.addElement(r);
 
 
         } catch (SQLException e) {
@@ -43,11 +43,15 @@ public class ReviewReport {
 
         list1.getSelectionModel().addListSelectionListener(e -> {
 
+            //stops one of two callback
             if(e.getValueIsAdjusting()) {
+
                 selectedReport = (Report) list1.getSelectedValue();
+
+                viewReportButton.setVisible(true);
                 verifyButton.setVisible(true);
                 verifyButton.setEnabled(VerifyButtonState());
-                viewReportButton.setVisible(true);
+
                 Global.frame.pack();
 
                 try {
@@ -66,11 +70,11 @@ public class ReviewReport {
 
         verifyButton.addActionListener(e -> {
             try {
+
                 DatabaseManager.VerifyReport(selectedReport, Global.user.isDoctor()?2:1);
-
                 verifyButton.setEnabled(VerifyButtonState());
+                list1.setModel(listModel);
 
-                list1.setModel(l1);
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
@@ -78,8 +82,7 @@ public class ReviewReport {
 
         viewReportButton.addActionListener(e -> {
             try {
-                Desktop desktop = Desktop.getDesktop();
-                desktop.open(new File("temp.pdf"));
+                Desktop.getDesktop().open(new File("temp.pdf"));
             } catch (IOException e1) {
                 e1.printStackTrace();
             }

@@ -3,8 +3,6 @@ import Models.User;
 import org.json.simple.JSONObject;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -24,19 +22,12 @@ public class StartForm {
 
         try {
             List<User> user = DatabaseManager.GetListOfUsers();
-
-            for(User u: user){
+            for(User u: user)
                 if(u.isDoctor())
                     docotorComboBox.addItem(u.getName());
-            }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        try{
             List<Patient> patients = DatabaseManager.GetAllPatient();
-
             for(Patient p: patients)
                 patientComboBox.addItem(p);
 
@@ -65,7 +56,6 @@ public class StartForm {
                 System.out.println(Global.awesomeClient.readMessageLine()); // read message
                 Global.ChangePanel(new GraphShow().panel1);
 
-
             } catch (IOException e1) {
                 Global.ShowPopup(panel1, "Error", "Server not responding");
                 e1.printStackTrace();
@@ -73,12 +63,7 @@ public class StartForm {
 
         });
 
-        createButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Global.ChangePanel(new CreatePatient().panel1);
-            }
-        });
+        createButton.addActionListener(e -> Global.ChangePanel(new CreatePatient().panel1));
     }
 
 
