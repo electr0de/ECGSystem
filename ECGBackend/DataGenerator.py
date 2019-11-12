@@ -73,7 +73,7 @@ def getData():
     df = pd.read_csv("bio_100Hz.csv")
     return df
 s = socket.socket()
-s.bind(('', port))
+s.bind(('', 4321))
 s.listen(1)
 
 while True:
