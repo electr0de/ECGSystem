@@ -30,11 +30,11 @@ def printReport(details,bio):
     pdf.set_xy(0, 0)
     pdf.set_font('arial', 'B', 12)
     pdf.cell(75, 10, "Report", 0, 1, 'C')
-    pdf.cell(60, 10, "Patient Name: %s"% (details["patient_name"]), 0, 0, 'C')
-    pdf.cell(60, 10, "Patient Name: %s" % (details["patient_age"]), 0, 1, 'C')
-    pdf.cell(60, 10, "Patient Name: %s" % (details["patient_sex"]), 0, 0, 'C')
-    pdf.cell(60, 10, "Patient Name: %s" % (details["doctors_name"]), 0, 1, 'C')
-    pdf.cell(60, 10, "Patient Name: %s" % (details["technician_name"]), 0, 1, 'C')
+    pdf.cell(60, 10, "Patient Name: %s"% (details["name"]), 0, 0, 'C')
+    pdf.cell(60, 10, "Patient Name: %s" % (details["age"]), 0, 1, 'C')
+    pdf.cell(60, 10, "Patient Name: %s" % (details["sex"]), 0, 0, 'C')
+    pdf.cell(60, 10, "Patient Name: %s" % (details["doctor_name"]), 0, 1, 'C')
+    pdf.cell(60, 10, "Patient Name: %s" % (details["tech_name"]), 0, 1, 'C')
     pdf.image('ecg.png', x=None, y=None, w=150, h=0, type='', link='')
     pdf.cell(75, 10, "ECG", 0, 1, 'C')
     pdf.cell(60, 10, "ECG Signal Quality: %f" % (bio["ECG"]["Average_Signal_Quality"]), 0, 1, 'C')
@@ -77,10 +77,10 @@ s.bind(('', 4321))
 s.listen(1)
 
 while True:
-    c = s.accept()
+    c,addr = s.accept()
     data = c.recv(1024).decode("utf-8")
     details = json.loads(data)
-
+    print("got details")
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -92,17 +92,23 @@ while True:
     value = (details["name"],details["sex"])
     mycursor = mydb.cursor()
 
-    result = mycursor.execute(sql, value)
-    r = mycursor.fetchall()
+    mycursor.execute(sql, value)
+    r = mycursor.lastrowid
     mydb.commit()
-    c.send("ok")
+    c.send('ok\n'.encode('ascii'))
+    print("sent ok")
     df = getData()
+
     # Process the signals
     for index, row in df.iterrows():
-        c.send(row['ECG'])
+
+        c.recv(1024)
+        print(row["ECG"])
+        c.send((str(row['ECG'])+'\n').encode('ascii'))
+
         time.sleep(1/100)
 
-    c.send("done")
+    c.send('done\n'.encode('ascii'))
     bio = nk.ecg_process(ecg=df["ECG"], rsp=None, sampling_rate=100)
     # details = {
     #     'patient_name': 'TestGuy',
@@ -112,14 +118,16 @@ while True:
     #     'technician_name': 'test_technician'
     # }
     printReport(details, bio)
-    raw_data = open("bio_100Hz.csv",'rt')
+    raw_open = open("bio_100Hz.csv",'rt')
+    raw_data = raw_open.read()
     file = convertToBinaryData()
-    insert_blob_tuple = (r[0], details["age"], details["doctor_name"],details["tech_name"],raw_data,file,0,0)
+    insert_blob_tuple = (r, details["age"], details["doctor_name"],details["tech_name"],raw_data,file,0,0)
 
-    sql_insert_blob_query = "INSERT INTO report (patient_id, patient_age, doctor_name, tech_name,raw_data,report,verified_by_tech,verified_by_doctor) VALUES (%d,%d,%s,%s,%s,%s,%d,%d)"
+    sql_insert_blob_query = "INSERT INTO report (patient_id, patient_age, doctor_name, tech_name,raw_data,report,verfied_by_tech,verfied_by_doctor) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
     mycursor.execute(sql_insert_blob_query, insert_blob_tuple)
     mydb.commit()
-    c.send("finish")
+
+    
 
 
 
