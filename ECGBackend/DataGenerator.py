@@ -8,7 +8,7 @@ import socket
 import json
 import mysql.connector
 import time
-
+import csv
 port = 12345
 
 
@@ -83,18 +83,19 @@ while True:
 
     mydb = mysql.connector.connect(
         host="localhost",
-        user="yourusername",
-        passwd="yourpassword"
+        user="root",
+        passwd="",
+        database="ecg"
     )
 
-    sql = "INSERT INTO patient (name,sex, age) VALUES (%s, %s, %d)"
-    value = (details["name"],details["age"],details["sex"])
+    sql = "INSERT INTO patient (name,sex) VALUES (%s, %s)"
+    value = (details["name"],details["sex"])
     mycursor = mydb.cursor()
 
-    mycursor.execute(sql, value)
-
+    result = mycursor.execute(sql, value)
+    r = mycursor.fetchall()
     mydb.commit()
-
+    c.send("ok")
     df = getData()
     # Process the signals
     for index, row in df.iterrows():
@@ -111,10 +112,14 @@ while True:
     #     'technician_name': 'test_technician'
     # }
     printReport(details, bio)
-    
+    raw_data = open("bio_100Hz.csv",'rt')
     file = convertToBinaryData()
-    insert_blob_tuple = (emp_id, name, empPicture, file)
+    insert_blob_tuple = (r[0], details["age"], details["doctor_name"],details["tech_name"],raw_data,file,0,0)
 
+    sql_insert_blob_query = "INSERT INTO report (patient_id, patient_age, doctor_name, tech_name,raw_data,report,verified_by_tech,verified_by_doctor) VALUES (%d,%d,%s,%s,%s,%s,%d,%d)"
+    mycursor.execute(sql_insert_blob_query, insert_blob_tuple)
+    mydb.commit()
+    c.send("finish")
 
 
 
