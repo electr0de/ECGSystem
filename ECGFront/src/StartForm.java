@@ -1,8 +1,10 @@
+import Models.Patient;
 import Models.User;
 import org.json.simple.JSONObject;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -14,8 +16,12 @@ public class StartForm {
     private JButton sendButton;
     private JComboBox sexComboBox;
     private JComboBox docotorComboBox;
+    private JComboBox patientComboBox;
+    private JButton createButton;
 
     public StartForm(){
+
+
         try {
             List<User> user = DatabaseManager.GetListOfUsers();
 
@@ -27,32 +33,50 @@ public class StartForm {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        sendButton.addActionListener(new ActionListener() {
+
+        try{
+            List<Patient> patients = DatabaseManager.GetAllPatient();
+
+            for(Patient p: patients)
+                patientComboBox.addItem(p);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        sendButton.addActionListener(e -> {
+
+
+            Patient p = (Patient) patientComboBox.getSelectedItem();
+
+            JSONObject obj = new JSONObject();
+            obj.put("id", p.getId());
+            obj.put("name", p.getName());
+            obj.put("sex", p.getSex());
+            obj.put("age", ageTextField.getText());
+            obj.put("doctor_name", docotorComboBox.getSelectedItem().toString());
+            obj.put("tech_name", Global.user.getName());
+
+            try {
+                System.out.println(obj.toJSONString());
+
+                Global.awesomeClient = new AwesomeSockets.AwesomeClientSocket("localhost", 4321);
+                Global.awesomeClient.sendMessageLine(obj.toJSONString()); // send message
+                System.out.println(Global.awesomeClient.readMessageLine()); // read message
+                Global.ChangePanel(new GraphShow().panel1);
+
+
+            } catch (IOException e1) {
+                Global.ShowPopup(panel1, "Error", "Server not responding");
+                e1.printStackTrace();
+            }
+
+        });
+
+        createButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-
-                JSONObject obj = new JSONObject();
-                obj.put("name", nameTextField.getText());
-                obj.put("age", ageTextField.getText());
-                obj.put("sex", sexComboBox.getSelectedItem().toString());
-                obj.put("doctor_name", docotorComboBox.getSelectedItem().toString());
-                obj.put("tech_name", Global.user.getName());
-
-                try {
-                    System.out.println(obj.toJSONString());
-
-                    Global.awesomeClient = new AwesomeSockets.AwesomeClientSocket("localhost", 4321);
-                    Global.awesomeClient.sendMessageLine(obj.toJSONString()); // send message
-                    System.out.println(Global.awesomeClient.readMessageLine()); // read message
-                    Global.ChangePanel(new GraphShow().panel1);
-
-
-                } catch (IOException e1) {
-                    Global.ShowPopup(panel1, "Error", "Server not responding");
-                    e1.printStackTrace();
-                }
-
+                Global.ChangePanel(new CreatePatient().panel1);
             }
         });
     }

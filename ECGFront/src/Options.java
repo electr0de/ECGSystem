@@ -9,6 +9,11 @@ public class Options {
     private JButton logoutButton;
 
     public Options() {
+
+        if(Global.user.isDoctor())
+            startButton.setVisible(false);
+
+
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -22,6 +27,12 @@ public class Options {
                 Global.ChangePanel(new LoginPage().panel1);
                 Global.user = null;
 
+            }
+        });
+        reviewReportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Global.ChangePanel(new ReviewReport().panel1);
             }
         });
     }
