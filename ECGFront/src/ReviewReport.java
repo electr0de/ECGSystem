@@ -29,7 +29,8 @@ public class ReviewReport {
             list1.setModel(l1);
 
             for(Report r: reports)
-                l1.addElement(r);
+                if(!Global.user.isDoctor() || (Global.user.isDoctor() && r.isVerifiedByTech()))
+                    l1.addElement(r);
 
 
         } catch (SQLException e) {
